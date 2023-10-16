@@ -10,14 +10,28 @@ const { Product } = require("../models/product");
 
 
 const getAllProducts = async (req, res) => {
-    // res.send("GET: Products API");
+    const { limit = 25, offset = 0 } = req.query;
+
     try {
-        const products = await Product.find();
-        res.status(200).json(products)
+        // Convert limit and offset to integers
+        const parsedLimit = parseInt(limit);
+        const parsedOffset = parseInt(offset);
+
+        // Validate limit and offset
+        if (isNaN(parsedLimit) || isNaN(parsedOffset) || parsedLimit <= 0 || parsedOffset < 0) {
+            return res.status(400).json({ message: 'Invalid limit or offset values' });
+        }
+
+        const products = await Product.find()
+            .limit(parsedLimit)
+            .skip(parsedOffset);
+
+        res.status(200).json(products);
     } catch (error) {
-        res.status(404).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 };
+
 
 const getProductById = async (req, res) => {
     //res.send("GET: Product by ID API");
