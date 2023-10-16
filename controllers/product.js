@@ -22,15 +22,28 @@ const getAllProducts = async (req, res) => {
             return res.status(400).json({ message: 'Invalid limit or offset values' });
         }
 
+        // Query to get products with pagination
         const products = await Product.find()
             .limit(parsedLimit)
             .skip(parsedOffset);
 
-        res.status(200).json(products);
+        // Query to get total product count
+        const totalProducts = await Product.countDocuments();
+
+        // Prepare response with count, limit, offset, and products
+        const response = {
+            count: totalProducts,
+            limit: parsedLimit,
+            offset: parsedOffset,
+            products: products
+        };
+
+        res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 const getProductById = async (req, res) => {
